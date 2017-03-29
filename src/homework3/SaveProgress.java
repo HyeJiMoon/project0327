@@ -6,22 +6,24 @@ package homework3;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
-import javax.print.DocFlavor.STRING;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 
-public class SaveProgress extends JFrame implements ActionListener{
+public class SaveProgress extends JFrame implements ActionListener {
 	JPanel panel;
 	JProgressBar bar;
 	JButton bt_open, bt_save ,bt_copy;
@@ -61,40 +63,44 @@ public class SaveProgress extends JFrame implements ActionListener{
 		
 		chooser=new JFileChooser("C:/java_workspace2/project0323");
 		
-		
 		setSize(500,200);
 		setVisible(true);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		
-		
 	}
 	
 	public void actionPerformed(ActionEvent e){
-		Object obj=e.getSource();
-		
+		Object obj=e.getSource(); 
+	
 		if(obj==bt_open){
 			open();
+		}else if(obj==bt_save){
+		
+			int state=chooser.showSaveDialog(this);
+		
+			if(state==JFileChooser.APPROVE_OPTION){ 
+			
+				file=chooser.getSelectedFile();
+				
+				String path=file.getAbsolutePath();
+				t_save.setText(path);
+			
+			}
+		}else if(obj==bt_copy){
+			
+			copy();
 			
 		}
-		save();
-		copy();
-		
-		
 	}
-
 	//파일열기
 		public void open(){
 		
 			int state=chooser.showOpenDialog(this);
-			if(state==JFileChooser.APPROVE_OPTION){
 			
-				file=chooser.getSelectedFile();
-				
-				String path=file.getAbsolutePath();		
-				
-				t_open.setText(path);
-				
+			if(state==JFileChooser.APPROVE_OPTION){			
+				file=chooser.getSelectedFile();				
+				String path=file.getAbsolutePath();					
+				t_open.setText(path);			
 			}		
 		}
 		public void save(){
@@ -105,10 +111,43 @@ public class SaveProgress extends JFrame implements ActionListener{
 				fis=new FileInputStream(oripath);
 				fos=new FileOutputStream(dest);
 			} catch (FileNotFoundException e) {
-
 				e.printStackTrace();
-			}
+			}	
+		}	
+		public void copy(){
+
+			String oriPath=t_open.getText();
+			String destPath=t_save.getText(); 
+			try{
+				fis=new FileInputStream(oriPath); 
+				fos=new FileOutputStream(destPath);
 		
+				int data=-1; 
+				while(true){
+					data=fis.read(); 
+					if(data==-1)break;  
+					fos.write(data);
+				}		
+				JOptionPane.showMessageDialog(this,"복사완료"); 
+	
+			}catch(FileNotFoundException e){
+				JOptionPane.showMessageDialog(this,"파일을 찾을 수 없습니다"); 
+			
+			}catch(IOException e){
+				JOptionPane.showMessageDialog(this,"IO 작업중 에러발생");		
+			
+			}finally{
+				
+				try{
+					if(fis!=null){
+						fis.close();
+					}
+					if(fos!=null){
+						fos.close();
+					}
+				}catch(IOException e){		
+				}
+			}
 		}
 	public static void main(String[] args) {
 		new SaveProgress();
